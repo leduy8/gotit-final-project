@@ -6,8 +6,8 @@ from main import config
 from main.commons.exceptions import Unauthorized
 
 
-def create_access_token(identity) -> str:
-    return jwt.encode(payload={'id': identity}, key=config.SECRET_KEY, algorithm='HS256')
+def create_access_token(payload: Dict) -> str:
+    return jwt.encode(payload=payload, key=config.SECRET_KEY, algorithm='HS256')
 
 
 def get_jwt_token() -> str:
@@ -21,6 +21,6 @@ def get_jwt_token() -> str:
 
 def get_jwt_payload(token: str) -> Dict:
     try:
-        jwt.decode(token, config.SECRET_KEY, algorithms=['HS256'])
+        return jwt.decode(token, config.SECRET_KEY, algorithms=['HS256'])
     except jwt.DecodeError:
         return None
