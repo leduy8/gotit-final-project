@@ -5,6 +5,8 @@ from main import db
 
 
 class UserModel(db.Model):
+    __tablename__ = 'users'
+
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(EmailType, index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
