@@ -1,6 +1,5 @@
 import logging
 import os
-from werkzeug.security import generate_password_hash, check_password_hash
 
 class BaseConfig:
     LOGGING_LEVEL = logging.INFO
@@ -11,3 +10,4 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     ITEMS_PER_PAGE = 10
+    CATEGORIES_PER_PAGE = 5
