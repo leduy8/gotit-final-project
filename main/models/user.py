@@ -14,6 +14,8 @@ class UserModel(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated = db.Column(db.DateTime, default=datetime.utcnow,
                         onupdate=datetime.utcnow, nullable=False)
+    items = db.relationship('ItemModel', backref='owner',
+                            cascade='all,delete', lazy='dynamic')
 
     def __str__(self) -> str:
         return f"<UserModel {self.id} {self.email}>"
