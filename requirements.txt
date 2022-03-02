@@ -8,3 +8,4 @@ PyMySQL>=1.0.2
 SQLAlchemy>=1.4.26
 alembic>=1.7.4
 marshmallow>=3.14.0
+SQLAlchemy-utils>=0.38.2
