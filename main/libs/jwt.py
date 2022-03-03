@@ -7,7 +7,10 @@ from main.commons.exceptions import Unauthorized
 
 
 def create_access_token(payload: Dict) -> str:
-    return jwt.encode(payload=payload, key=config.SECRET_KEY, algorithm='HS256')
+    if type(payload) == dict:
+        return jwt.encode(payload=payload, key=config.SECRET_KEY, algorithm='HS256')
+
+    return None
 
 
 def get_jwt_token() -> str:
