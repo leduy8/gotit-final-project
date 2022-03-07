@@ -9,8 +9,9 @@ class UserSchema(BaseSchema):
         validate=validate.Length(max=50),
         required=True
     )
-    password_hash = fields.String(
+    password = fields.String(
         load_only=True,
+        required=True,
         validate=validate.Length(min=6, max=32)
     )
     salt = fields.String(dump_only=True)
