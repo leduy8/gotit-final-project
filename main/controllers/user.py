@@ -4,7 +4,7 @@ from marshmallow import ValidationError
 from main import app
 from main.schemas.user import UserSchema
 from main.commons.exceptions import BadRequest
-from main.engines.user import find_by_email, create_user
+from main.engines.user import find_by_email, create
 from main.libs.jwt import create_access_token
 
 
@@ -21,6 +21,6 @@ def register_user():
     if find_by_email(data['email']):
         raise BadRequest(error_data=data, error_message=f'Email is already registered.')
 
-    user = create_user(data)
+    user = create(data)
 
     return jsonify({'access_token': create_access_token({'id': user.id})}), 201

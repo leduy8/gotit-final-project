@@ -23,7 +23,7 @@ def find_by_email_and_password(email: str, password: str):
     return user
 
 
-def create_user(data: Dict) -> UserModel:
+def create(data: Dict) -> UserModel:
     salt = gen_salt()
     password_hash = generate_password_hash(data['password'], salt)
 
