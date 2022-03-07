@@ -1,3 +1,6 @@
+from tests.controllers.create_data import create_dummy_user
+
+
 def test_success_register_user(client):
     response = client.post(
         '/users',
@@ -80,14 +83,7 @@ def test_fail_register_user_invalid_passsword_length(client):
 
 
 def test_fail_register_user_already_exists(client):
-    client.post(
-        '/users',
-        json={
-            'email': 'duy123@gmail.com',
-            'password': '123456'
-        },
-        content_type='application/json'
-    )
+    create_dummy_user(client)
 
     response = client.post(
         '/users',
