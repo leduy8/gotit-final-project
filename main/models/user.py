@@ -14,6 +14,8 @@ class UserModel(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated = db.Column(db.DateTime, default=datetime.utcnow,
                         onupdate=datetime.utcnow, nullable=False)
+    categories = db.relationship('CategoryModel', backref='owner',
+                                 cascade='all,delete', lazy='dynamic')
     items = db.relationship('ItemModel', backref='owner',
                             cascade='all,delete', lazy='dynamic')
 

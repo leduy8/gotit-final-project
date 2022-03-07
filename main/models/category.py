@@ -11,6 +11,7 @@ class CategoryModel(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated = db.Column(db.DateTime, default=datetime.utcnow,
                         onupdate=datetime.utcnow, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     items = db.relationship('ItemModel', backref='category',
                             cascade='all,delete', lazy='dynamic')
 
