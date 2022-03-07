@@ -17,7 +17,7 @@ def get_jwt_token() -> str:
     auth_header = request.headers.get('Authorization', None)
 
     if not auth_header or not auth_header.startswith('Bearer ') or len(auth_header.split(' ')) != 2:
-        raise Unauthorized()
+        return None
 
     return auth_header.split(' ')[1]
 
