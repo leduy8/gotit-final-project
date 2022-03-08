@@ -1,1 +1,1 @@
-from . import probe, auth, user
+from . import probe, auth, user, category
