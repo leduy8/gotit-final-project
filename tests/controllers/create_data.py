@@ -17,8 +17,19 @@ def create_dummy_user(client):
     return response
 
 
-def create_dummy_item():
-    pass
+def create_dummy_item(client, jwt, category_id):
+    response = client.post(
+        '/items',
+        json={
+            'name': 'Item 0',
+            'description': 'My item 0 description',
+            'category_id': category_id
+        },
+        headers={'Authorization': f'Bearer {jwt}'},
+        content_type='application/json'
+    )
+    print(response.json)
+    return response.json['id']
 
 
 def create_dummy_category(client, jwt):
