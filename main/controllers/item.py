@@ -14,7 +14,6 @@ from main.commons.exceptions import BadRequest, Forbidden, NotFound
 @app.post('/items')
 @jwt_required
 def create_item(user_id):
-    data = request.get_json() or {}
     schema = ItemSchema()
 
     try:
@@ -23,6 +22,7 @@ def create_item(user_id):
         value = random.choice(list(e.messages.values()))
         raise BadRequest(error_data=e.data, error_message=value[0])
 
+    data = request.get_json() or {}
     item = create(data, user_id)
 
     return jsonify(schema.dump(item)), 201
@@ -63,7 +63,6 @@ def get_items(user_id):
 @app.get('/items/<id>')
 @jwt_not_required
 def get_item_by_id(user_id, id):
-    item = get_by_id(id, user_id)
     schema = IdSchema()
 
     try:
@@ -71,6 +70,8 @@ def get_item_by_id(user_id, id):
     except ValidationError as e:
         value = random.choice(list(e.messages.values()))
         raise BadRequest(error_data=e.data, error_message=value[0])
+
+    item = get_by_id(id, user_id)
 
     if not item:
         raise NotFound(error_message=f'Item not found.')
@@ -108,7 +109,6 @@ def update_item_by_id(user_id, id):
 @app.delete('/items/<id>')
 @jwt_required
 def delete_item_by_id(user_id, id):
-    item = get_by_id(id, user_id)
     schema = IdSchema()
 
     try:
@@ -116,6 +116,8 @@ def delete_item_by_id(user_id, id):
     except ValidationError as e:
         value = random.choice(list(e.messages.values()))
         raise BadRequest(error_data=e.data, error_message=value[0])
+
+    item = get_by_id(id, user_id)
 
     if not item:
         raise NotFound(error_message='Item not found.')

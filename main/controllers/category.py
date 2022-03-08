@@ -1,3 +1,4 @@
+import random
 from flask import jsonify, request
 from marshmallow import ValidationError
 
@@ -50,7 +51,8 @@ def get_categories(user_id):
             'total_items': total_items
         })
     except ValidationError as e:
-        raise BadRequest(error_data=e.data, error_message=e.messages)
+        value = random.choice(list(e.messages.values()))
+        raise BadRequest(error_data=e.data, error_message=value[0])
 
     categories = get_all({'page': page, 'items_per_page': items_per_page}, user_id)
 
@@ -65,13 +67,15 @@ def get_categories(user_id):
 @app.get('/categories/<id>')
 @jwt_not_required
 def get_category_by_id(user_id, id):
-    category = get_by_id(id, user_id)
     schema = IdSchema()
 
     try:
         schema.load({'id': id})
     except ValidationError as e:
-        raise BadRequest(error_data=id, error_message=e.messages)
+        value = random.choice(list(e.messages.values()))
+        raise BadRequest(error_data=e.data, error_message=value[0])
+
+    category = get_by_id(id, user_id)
 
     if not category:
         raise NotFound(error_message=f'Category not found.')
@@ -82,6 +86,14 @@ def get_category_by_id(user_id, id):
 @app.put('/categories/<id>')
 @jwt_required
 def update_category_by_id(user_id, id):
+    id_schema = IdSchema()
+
+    try:
+        id_schema.load({'id': id})
+    except ValidationError as e:
+        value = random.choice(list(e.messages.values()))
+        raise BadRequest(error_data=e.data, error_message=value[0])
+
     category = get_by_id(id, user_id)
 
     if not category:
@@ -92,13 +104,12 @@ def update_category_by_id(user_id, id):
 
     data = request.get_json()
     category_schema = CategorySchema()
-    id_schema = IdSchema()
 
     try:
         category_schema.load(data)
-        id_schema.load({'id': id})
     except ValidationError as e:
-        raise BadRequest(error_data=e.data, error_message=e.messages)
+        value = random.choice(list(e.messages.values()))
+        raise BadRequest(error_data=e.data, error_message=value[0])
 
     updated_category = update(data, id)
 
@@ -113,13 +124,15 @@ def update_category_by_id(user_id, id):
 @app.delete('/categories/<id>')
 @jwt_required
 def delete_category_by_id(user_id, id):
-    category = get_by_id(id, user_id)
     schema = IdSchema()
 
     try:
         schema.load({'id': id})
     except ValidationError as e:
-        raise BadRequest(error_data=id, error_message=e.messages)
+        value = random.choice(list(e.messages.values()))
+        raise BadRequest(error_data=e.data, error_message=value[0])
+
+    category = get_by_id(id, user_id)
 
     if not category:
         raise NotFound(error_message='Category not found.')
