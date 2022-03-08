@@ -14,7 +14,7 @@ def find_by_id(id: int) -> UserModel:
     return UserModel.query.filter_by(id=id).first()
 
 
-def find_by_email_and_password(email: str, password: str):
+def find_by_email_and_password(email: str, password: str) -> UserModel:
     user = UserModel.query.filter_by(email=email).first()
 
     if not user or not check_password_hash(user.password_hash, password, user.salt):

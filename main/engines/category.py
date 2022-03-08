@@ -37,11 +37,11 @@ def get_all(params: Dict, user_id: int) -> List[CategoryModel]:
     }
 
 
-def get_count():
+def get_count() -> int:
     return CategoryModel.query.count()
 
 
-def get_by_id(id, user_id):
+def get_by_id(id, user_id) -> Dict:
     category = CategoryModel.query.filter_by(id=id).first()
 
     if not category:
