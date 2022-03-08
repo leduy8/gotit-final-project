@@ -27,17 +27,13 @@ def create_category(user_id):
 @jwt_not_required
 @load_schema('params', PaginationSchema)
 def get_categories(user_id):
-    page = request.args.get('page', 1, type=int)
-    items_per_page = request.args.get(
-        'items_per_page',
-        app.config['CATEGORIES_PER_PAGE'],
-        type=int
-    )
+    params = {
+        'page': request.args.get('page', 1, type=int),
+        'items_per_page': request.args.get('items_per_page', app.config['CATEGORIES_PER_PAGE'], type=int),
+        'total_items': get_count()
+    }
 
-    categories = get_all(
-        {'page': page, 'items_per_page': items_per_page, 'total_items': get_count()},
-        user_id
-    )
+    categories = get_all(params, user_id)
 
     return jsonify(categories)
 
