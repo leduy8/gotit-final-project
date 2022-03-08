@@ -49,8 +49,12 @@ def get_by_id(id, user_id) -> Dict:
 
 
 def create(data: Dict, user_id) -> ItemModel:
-    item = ItemModel(name=data['name'], user_id=user_id,
-                     category_id=data['category_id'], description=data['description'] or None)
+    item = ItemModel(
+        name=data['name'],
+        user_id=user_id,
+        category_id=data['category_id'],
+        description=data['description'] if 'description' in data else None
+    )
 
     db.session.add(item)
     db.session.commit()
