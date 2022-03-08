@@ -1,22 +1,17 @@
 from flask import jsonify, request
-from marshmallow import ValidationError
 
 from main import app
 from main.schemas.user import UserSchema
 from main.commons.exceptions import BadRequest
+from main.commons.decorators import load_schema
 from main.engines.user import find_by_email, create
 from main.libs.jwt import create_access_token
 
 
 @app.post('/users')
+@load_schema('body', UserSchema)
 def register_user():
     data = request.get_json()
-    schema = UserSchema()
-
-    try:
-        schema.load(data)
-    except ValidationError as e:
-        raise BadRequest(error_data=e.data, error_message=e.messages)
 
     if find_by_email(data['email']):
         raise BadRequest(error_data=data, error_message=f'Email is already registered.')
