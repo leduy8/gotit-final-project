@@ -20,6 +20,24 @@ def test_success_create_item(client):
     assert type(response.json) == dict
 
 
+def test_success_create_item_missing_description(client):
+    jwt = get_dummy_jwt(client)
+    category_id = create_dummy_category(client, jwt)
+
+    response = client.post(
+        '/items',
+        json={
+            'name': 'Item 1',
+            'category_id': category_id
+        },
+        content_type='application/json',
+        headers={'Authorization': f'Bearer {jwt}'}
+    )
+
+    assert response.status_code == 201
+    assert type(response.json) == dict
+
+
 def test_fail_create_item_missing_name(client):
     jwt = get_dummy_jwt(client)
     category_id = create_dummy_category(client, jwt)
@@ -235,6 +253,24 @@ def test_success_update_item_by_id(client):
         json={
             'name': 'Item 1',
             'description': 'Funny',
+            'category_id': category_id
+        },
+        headers={'Authorization': f'Bearer {jwt}'}
+    )
+
+    assert response.status_code == 200
+
+
+def test_success_update_item_by_id_missing_description(client):
+    jwt = get_dummy_jwt(client)
+    category_id = create_dummy_category(client, jwt)
+    item_id = create_dummy_item(client, jwt, category_id)
+
+    response = client.put(
+        f'/items/{item_id}',
+        content_type='application/json',
+        json={
+            'name': 'Item 1',
             'category_id': category_id
         },
         headers={'Authorization': f'Bearer {jwt}'}
