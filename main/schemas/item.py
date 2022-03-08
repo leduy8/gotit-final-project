@@ -15,4 +15,7 @@ class ItemSchema(BaseSchema):
     created = fields.DateTime(dump_only=True)
     updated = fields.DateTime(dump_only=True)
     user_id = fields.Integer(dump_only=True)
-    category_id = fields.Integer(dump_only=True)
+    category_id = fields.Integer(
+        validate=validate.Range(min=1),
+        required=True,
+    )
