@@ -29,14 +29,12 @@ def get_items(user_id):
         type=int
     )
 
-    items = get_all({'page': page, 'items_per_page': items_per_page}, user_id)
+    items = get_all(
+        {'page': page, 'items_per_page': items_per_page, 'total_items': get_count()},
+        user_id
+    )
 
-    return jsonify({
-        'items': items,
-        'page': page,
-        'items_per_page': items_per_page,
-        'total_items': get_count()
-    })
+    return jsonify(items)
 
 
 @app.get('/items/<id>')

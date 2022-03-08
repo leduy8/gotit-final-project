@@ -34,14 +34,12 @@ def get_categories(user_id):
         type=int
     )
 
-    categories = get_all({'page': page, 'items_per_page': items_per_page}, user_id)
+    categories = get_all(
+        {'page': page, 'items_per_page': items_per_page, 'total_items': get_count()},
+        user_id
+    )
 
-    return jsonify({
-        'categories': categories,
-        'page': page,
-        'items_per_page': items_per_page,
-        'total_items': get_count(),
-    })
+    return jsonify(categories)
 
 
 @app.get('/categories/<id>')

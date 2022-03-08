@@ -1,6 +1,5 @@
 from typing import Dict, List
 
-
 from main import db
 from main.models.item import ItemModel
 
@@ -35,7 +34,12 @@ def get_all(params: Dict, user_id: int) -> List[ItemModel]:
 
     items = [get_item_data(item, user_id) for item in items.items]
 
-    return items
+    return {
+        'items': items,
+        'page': params['page'],
+        'items_per_page': params['items_per_page'],
+        'total_items': params['total_items']
+    }
 
 
 def get_count() -> int:

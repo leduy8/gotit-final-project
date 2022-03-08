@@ -1,6 +1,5 @@
 from typing import Dict, List
 
-
 from main import db
 from main.models.category import CategoryModel
 
@@ -30,7 +29,12 @@ def get_all(params: Dict, user_id: int) -> List[CategoryModel]:
 
     categories = [get_category_data(category, user_id) for category in categories.items]
 
-    return categories
+    return {
+        'categories': categories,
+        'page': params['page'],
+        'items_per_page': params['items_per_page'],
+        'total_items': params['total_items']
+    }
 
 
 def get_count():
