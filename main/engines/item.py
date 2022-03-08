@@ -28,7 +28,10 @@ def get_item_data(item: ItemModel, user_id: int) -> Dict:
 
 def get_all(params: Dict, user_id: int) -> List[ItemModel]:
     items = ItemModel.query.paginate(
-        params['page'], params['items_per_page'], False)
+        params['page'],
+        params['items_per_page'],
+        False
+    )
 
     items = [get_item_data(item, user_id) for item in items.items]
 

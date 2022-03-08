@@ -3,7 +3,6 @@ from typing import Dict, List
 
 from main import db
 from main.models.category import CategoryModel
-from main.commons.exceptions import NotFound
 
 
 def find_by_name(name: str) -> CategoryModel:

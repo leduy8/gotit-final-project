@@ -23,7 +23,8 @@ def create_category(user_id):
 
     if find_by_name(data['name']):
         raise BadRequest(
-            error_message=f'Category with name={data["name"]} has already been used.')
+            error_message=f'Category with name={data["name"]} has already been used.'
+        )
 
     category = create(data, user_id)
 
@@ -35,7 +36,10 @@ def create_category(user_id):
 def get_categories(user_id):
     page = request.args.get('page', 1, type=int)
     items_per_page = request.args.get(
-        'items_per_page', app.config['CATEGORIES_PER_PAGE'], type=int)
+        'items_per_page',
+        app.config['CATEGORIES_PER_PAGE'],
+        type=int
+    )
     total_items = get_count()
     schema = PaginationSchema()
 
@@ -100,7 +104,8 @@ def update_category_by_id(user_id, id):
 
     if not updated_category:
         raise BadRequest(
-            error_message=f'Category with name={data["name"]} has already been used.')
+            error_message=f'Category with name={data["name"]} has already been used.'
+        )
 
     return jsonify(category_schema.dump(updated_category))
 

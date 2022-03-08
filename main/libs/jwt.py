@@ -3,7 +3,6 @@ import jwt
 from flask import request
 
 from main import config
-from main.commons.exceptions import Unauthorized
 
 
 def create_access_token(payload: Dict) -> str:

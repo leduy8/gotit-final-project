@@ -33,7 +33,10 @@ def create_item(user_id):
 def get_items(user_id):
     page = request.args.get('page', 1, type=int)
     items_per_page = request.args.get(
-        'items_per_page', app.config['ITEMS_PER_PAGE'], type=int)
+        'items_per_page',
+        app.config['ITEMS_PER_PAGE'],
+        type=int
+    )
     total_items = get_count()
     schema = PaginationSchema()
 
