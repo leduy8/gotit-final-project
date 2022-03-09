@@ -23,6 +23,10 @@ def get_category_data(category: CategoryModel, user_id: int) -> Dict:
     }
 
 
+def get_count() -> int:
+    return CategoryModel.query.count()
+
+
 def get_all(params: Dict, user_id: int) -> List[CategoryModel]:
     categories = CategoryModel.query.paginate(
         params['page'], params['items_per_page'], False)
@@ -35,10 +39,6 @@ def get_all(params: Dict, user_id: int) -> List[CategoryModel]:
         'items_per_page': params['items_per_page'],
         'total_items': params['total_items']
     }
-
-
-def get_count() -> int:
-    return CategoryModel.query.count()
 
 
 def get_by_id(id, user_id) -> Dict:

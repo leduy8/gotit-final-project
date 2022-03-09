@@ -4,13 +4,8 @@ from main import db
 from main.models.item import ItemModel
 
 
-def find_by_name(name: str) -> ItemModel:
-    item = ItemModel.query.filter_by(name=name).first()
-
-    if not item:
-        return None
-
-    return item
+def get_count() -> int:
+    return ItemModel.query.count()
 
 
 def get_item_data(item: ItemModel, user_id: int) -> Dict:
@@ -40,10 +35,6 @@ def get_all(params: Dict, user_id: int) -> List[ItemModel]:
         'items_per_page': params['items_per_page'],
         'total_items': params['total_items']
     }
-
-
-def get_count() -> int:
-    return ItemModel.query.count()
 
 
 def get_by_id(id, user_id) -> Dict:
