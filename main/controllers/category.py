@@ -38,7 +38,7 @@ def get_categories(user_id):
     return jsonify(categories)
 
 
-@app.get('/categories/<id>')
+@app.get('/categories/<int:id>')
 @require_non_authoried_user
 def get_category_by_id(user_id, id):
     category = category_engine.get_category_by_id(id, user_id)
@@ -49,7 +49,7 @@ def get_category_by_id(user_id, id):
     return jsonify(category)
 
 
-@app.put('/categories/<id>')
+@app.put('/categories/<int:id>')
 @require_authorized_user
 @validate_request('body', CategorySchema)
 def update_category_by_id(user_id, id):
@@ -72,7 +72,7 @@ def update_category_by_id(user_id, id):
     return CategorySchema().jsonify(updated_category)
 
 
-@app.delete('/categories/<id>')
+@app.delete('/categories/<int:id>')
 @require_authorized_user
 def delete_category_by_id(user_id, id):
     category = category_engine.get_category_by_id(id, user_id)
