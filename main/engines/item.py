@@ -61,9 +61,6 @@ def create(data: Dict, user_id) -> ItemModel:
 
 
 def update(data, id) -> ItemModel:
-    if ItemModel.query.filter_by(name=data['name']).first():
-        return None
-
     item = ItemModel.query.filter_by(id=id).first()
 
     item.name = data['name']
