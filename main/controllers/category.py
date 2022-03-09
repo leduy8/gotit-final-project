@@ -20,7 +20,7 @@ def create_category(user_id):
 
     category = category_engine.create_category(data, user_id)
 
-    return jsonify(CategorySchema().dump(category)), 201
+    return CategorySchema().jsonify(category), 201
 
 
 @app.get('/categories')
@@ -69,7 +69,7 @@ def update_category_by_id(user_id, id):
             error_message=f'Category with name={data["name"]} has already been used.'
         )
 
-    return jsonify(CategorySchema().dump(updated_category))
+    return CategorySchema().jsonify(updated_category)
 
 
 @app.delete('/categories/<id>')
