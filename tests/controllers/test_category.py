@@ -153,7 +153,7 @@ def test_fail_get_category_by_id_invalid_id(client):
         headers={'Authorization': f'Bearer {jwt}'}
     )
 
-    assert response.status_code == 400
+    assert response.status_code == 404
 
 
 # # * ============================================================
