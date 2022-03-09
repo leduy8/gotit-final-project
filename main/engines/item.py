@@ -4,7 +4,7 @@ from main import db
 from main.models.item import ItemModel
 
 
-def get_count() -> int:
+def get_item_count() -> int:
     return ItemModel.query.count()
 
 
@@ -20,7 +20,7 @@ def get_item_data(item: ItemModel, user_id: int) -> Dict:
     }
 
 
-def get_all(params: Dict, user_id: int) -> List[ItemModel]:
+def get_all_items(params: Dict, user_id: int) -> List[ItemModel]:
     items = ItemModel.query.paginate(
         params['page'],
         params['items_per_page'],
@@ -37,7 +37,7 @@ def get_all(params: Dict, user_id: int) -> List[ItemModel]:
     }
 
 
-def get_by_id(id, user_id) -> Dict:
+def get_item_by_id(id, user_id) -> Dict:
     item = ItemModel.query.filter_by(id=id).first()
 
     if not item:
@@ -46,7 +46,7 @@ def get_by_id(id, user_id) -> Dict:
     return get_item_data(item, user_id)
 
 
-def create(data: Dict, user_id) -> ItemModel:
+def create_item(data: Dict, user_id) -> ItemModel:
     item = ItemModel(
         name=data['name'],
         user_id=user_id,
@@ -60,7 +60,7 @@ def create(data: Dict, user_id) -> ItemModel:
     return item
 
 
-def update(data, id) -> ItemModel:
+def update_item(data, id) -> ItemModel:
     item = ItemModel.query.filter_by(id=id).first()
 
     item.name = data['name']
@@ -71,7 +71,7 @@ def update(data, id) -> ItemModel:
     return item
 
 
-def delete(id):
+def delete_item(id):
     item = ItemModel.query.filter_by(id=id).first()
 
     if not item:

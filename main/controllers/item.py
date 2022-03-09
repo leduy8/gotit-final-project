@@ -1,43 +1,42 @@
 from flask import jsonify, request
 
 from main import app
-from main.commons.decorators import jwt_required, jwt_not_required, load_schema, load_id_schema
+from main.commons.decorators import require_authorized_user, require_non_authoried_user, validate_request
 from main.schemas.item import ItemSchema
 from main.schemas.base import PaginationSchema
-from main.engines.item import get_all, get_by_id, get_count, create, update, delete
+from main.engines import item as item_engine
 from main.commons.exceptions import Forbidden, NotFound
 
 
 @app.post('/items')
-@jwt_required
-@load_schema('body', ItemSchema)
+@require_authorized_user
+@validate_request('body', ItemSchema)
 def create_item(user_id):
     data = request.get_json() or {}
-    item = create(data, user_id)
+    item = item_engine.create_item(data, user_id)
 
-    return jsonify(ItemSchema().dump(item)), 201
+    return ItemSchema().jsonify(item), 201
 
 
 @app.get('/items')
-@jwt_not_required
-@load_schema('params', PaginationSchema)
+@require_non_authoried_user
+@validate_request('params', PaginationSchema)
 def get_items(user_id):
     params = {
         'page': request.args.get('page', 1, type=int),
         'items_per_page': request.args.get('items_per_page', app.config['ITEMS_PER_PAGE'], type=int),
-        'total_items': get_count()
+        'total_items': item_engine.get_item_count()
     }
 
-    items = get_all(params, user_id)
+    items = item_engine.get_all_items(params, user_id)
 
     return jsonify(items)
 
 
-@app.get('/items/<id>')
-@jwt_not_required
-@load_id_schema
+@app.get('/items/<int:id>')
+@require_non_authoried_user
 def get_item_by_id(user_id, id):
-    item = get_by_id(id, user_id)
+    item = item_engine.get_item_by_id(id, user_id)
 
     if not item:
         raise NotFound(error_message=f'Item not found.')
@@ -45,12 +44,11 @@ def get_item_by_id(user_id, id):
     return jsonify(item)
 
 
-@app.put('/items/<id>')
-@jwt_required
-@load_id_schema
-@load_schema('body', ItemSchema)
+@app.put('/items/<int:id>')
+@require_authorized_user
+@validate_request('body', ItemSchema)
 def update_item_by_id(user_id, id):
-    item = get_by_id(id, user_id)
+    item = item_engine.get_item_by_id(id, user_id)
 
     if not item:
         raise NotFound(error_message=f'Item not found.')
@@ -59,16 +57,15 @@ def update_item_by_id(user_id, id):
         raise Forbidden(error_message=f'Token is invalid or has been revoked.')
 
     data = request.get_json()
-    updated_item = update(data, id)
+    updated_item = item_engine.update_item(data, id)
 
-    return jsonify(ItemSchema().dump(updated_item))
+    return ItemSchema().jsonify(updated_item)
 
 
-@app.delete('/items/<id>')
-@jwt_required
-@load_id_schema
+@app.delete('/items/<int:id>')
+@require_authorized_user
 def delete_item_by_id(user_id, id):
-    item = get_by_id(id, user_id)
+    item = item_engine.get_item_by_id(id, user_id)
 
     if not item:
         raise NotFound(error_message='Item not found.')
@@ -76,6 +73,6 @@ def delete_item_by_id(user_id, id):
     if not item['is_owner']:
         raise Forbidden(error_message='Token is invalid or has been revoked.')
 
-    delete(id)
+    item_engine.delete_item(id)
 
     return jsonify({})

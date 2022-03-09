@@ -3,19 +3,19 @@ from flask import jsonify, request
 from main import app
 from main.schemas.user import UserSchema
 from main.commons.exceptions import BadRequest
-from main.commons.decorators import load_schema
-from main.engines.user import find_by_email, create
+from main.commons.decorators import validate_request
+from main.engines import user as user_engine
 from main.libs.jwt import create_access_token
 
 
 @app.post('/users')
-@load_schema('body', UserSchema)
+@validate_request('body', UserSchema)
 def register_user():
     data = request.get_json()
 
-    if find_by_email(data['email']):
+    if user_engine.find_user_by_email(data['email']):
         raise BadRequest(error_data=data, error_message=f'Email is already registered.')
 
-    user = create(data)
+    user = user_engine.create_user(data)
 
     return jsonify({'access_token': create_access_token({'id': user.id})}), 201

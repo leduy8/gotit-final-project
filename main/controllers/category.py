@@ -1,48 +1,47 @@
 from flask import jsonify, request
 
 from main import app
-from main.commons.decorators import jwt_required, jwt_not_required, load_id_schema, load_schema
+from main.commons.decorators import require_authorized_user, require_non_authoried_user, validate_request
 from main.commons.exceptions import BadRequest, NotFound, Forbidden
-from main.engines.category import delete, find_by_name, create, get_all, get_count, get_by_id, update
+from main.engines import category as category_engine
 from main.schemas.base import PaginationSchema
 from main.schemas.category import CategorySchema
 
 
 @app.post('/categories')
-@jwt_required
-@load_schema('body', CategorySchema)
+@require_authorized_user
+@validate_request('body', CategorySchema)
 def create_category(user_id):
     data = request.get_json() or {}
 
-    if find_by_name(data['name']):
+    if category_engine.find_category_by_name(data['name']):
         raise BadRequest(
             error_message=f'Category with name={data["name"]} has already been used.')
 
-    category = create(data, user_id)
+    category = category_engine.create_category(data, user_id)
 
     return jsonify(CategorySchema().dump(category)), 201
 
 
 @app.get('/categories')
-@jwt_not_required
-@load_schema('params', PaginationSchema)
+@require_non_authoried_user
+@validate_request('params', PaginationSchema)
 def get_categories(user_id):
     params = {
         'page': request.args.get('page', 1, type=int),
         'items_per_page': request.args.get('items_per_page', app.config['CATEGORIES_PER_PAGE'], type=int),
-        'total_items': get_count()
+        'total_items': category_engine.get_category_count()
     }
 
-    categories = get_all(params, user_id)
+    categories = category_engine.get_all_categories(params, user_id)
 
     return jsonify(categories)
 
 
 @app.get('/categories/<id>')
-@jwt_not_required
-@load_id_schema
+@require_non_authoried_user
 def get_category_by_id(user_id, id):
-    category = get_by_id(id, user_id)
+    category = category_engine.get_category_by_id(id, user_id)
 
     if not category:
         raise NotFound(error_message=f'Category not found.')
@@ -51,11 +50,10 @@ def get_category_by_id(user_id, id):
 
 
 @app.put('/categories/<id>')
-@jwt_required
-@load_id_schema
-@load_schema('body', CategorySchema)
+@require_authorized_user
+@validate_request('body', CategorySchema)
 def update_category_by_id(user_id, id):
-    category = get_by_id(id, user_id)
+    category = category_engine.get_category_by_id(id, user_id)
 
     if not category:
         raise NotFound(error_message='Category not found.')
@@ -64,7 +62,7 @@ def update_category_by_id(user_id, id):
         raise Forbidden(error_message='Token is invalid or has been revoked.')
 
     data = request.get_json()
-    updated_category = update(data, id)
+    updated_category = category_engine.update_category(data, id)
 
     if not updated_category:
         raise BadRequest(
@@ -75,10 +73,9 @@ def update_category_by_id(user_id, id):
 
 
 @app.delete('/categories/<id>')
-@jwt_required
-@load_id_schema
+@require_authorized_user
 def delete_category_by_id(user_id, id):
-    category = get_by_id(id, user_id)
+    category = category_engine.get_category_by_id(id, user_id)
 
     if not category:
         raise NotFound(error_message='Category not found.')
@@ -86,6 +83,6 @@ def delete_category_by_id(user_id, id):
     if not category['is_owner']:
         raise Forbidden(error_message='Token is invalid or has been revoked.')
 
-    delete(id)
+    category_engine.delete_category(id)
 
     return jsonify({})

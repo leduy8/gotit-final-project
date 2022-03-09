@@ -4,7 +4,7 @@ from main import db
 from main.models.category import CategoryModel
 
 
-def find_by_name(name: str) -> CategoryModel:
+def find_category_by_name(name: str) -> CategoryModel:
     category = CategoryModel.query.filter_by(name=name).first()
 
     if not category:
@@ -23,11 +23,11 @@ def get_category_data(category: CategoryModel, user_id: int) -> Dict:
     }
 
 
-def get_count() -> int:
+def get_category_count() -> int:
     return CategoryModel.query.count()
 
 
-def get_all(params: Dict, user_id: int) -> List[CategoryModel]:
+def get_all_categories(params: Dict, user_id: int) -> List[CategoryModel]:
     categories = CategoryModel.query.paginate(
         params['page'], params['items_per_page'], False)
 
@@ -41,7 +41,7 @@ def get_all(params: Dict, user_id: int) -> List[CategoryModel]:
     }
 
 
-def get_by_id(id, user_id) -> Dict:
+def get_category_by_id(id, user_id) -> Dict:
     category = CategoryModel.query.filter_by(id=id).first()
 
     if not category:
@@ -50,7 +50,7 @@ def get_by_id(id, user_id) -> Dict:
     return get_category_data(category, user_id)
 
 
-def create(data: Dict, user_id) -> CategoryModel:
+def create_category(data: Dict, user_id) -> CategoryModel:
     category = CategoryModel(name=data['name'], user_id=user_id)
 
     db.session.add(category)
@@ -59,7 +59,7 @@ def create(data: Dict, user_id) -> CategoryModel:
     return category
 
 
-def update(data, id) -> CategoryModel:
+def update_category(data, id) -> CategoryModel:
     if CategoryModel.query.filter_by(name=data['name']).first():
         return None
 
@@ -72,7 +72,7 @@ def update(data, id) -> CategoryModel:
     return category
 
 
-def delete(id):
+def delete_category(id):
     category = CategoryModel.query.filter_by(id=id).first()
 
     if not category:
