@@ -1,5 +1,6 @@
 import functools
 
+import jwt
 from flask import request
 from marshmallow import ValidationError
 
@@ -13,20 +14,25 @@ def authorize_user(required=True):
     def decorated(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            token = get_jwt_token()
-
-            if required and not token:
-                raise Unauthorized(error_message="Token is required.")
-            elif not required and not token:
+            try:
+                token = get_jwt_token()
+            except ValueError:
+                if required:
+                    raise Unauthorized(error_message="Token is required.")
                 return f(None, *args, **kwargs)
 
-            data = get_jwt_payload(token)
-            user = find_user_by_id(data["id"])
+            try:
+                data = get_jwt_payload(token)
+                user = find_user_by_id(data["id"])
 
-            if not user:
+                if not user:
+                    raise Forbidden(
+                        error_message="Token is invalid or has been revoked."
+                    )
+
+                return f(user.id, *args, **kwargs)
+            except jwt.DecodeError:
                 raise Forbidden(error_message="Token is invalid or has been revoked.")
-
-            return f(user.id, *args, **kwargs)
 
         return wrapper
 
