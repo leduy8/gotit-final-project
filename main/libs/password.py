@@ -13,11 +13,10 @@ def generate_password_hash(password: str, salt: str) -> str:
     try:
         password_hash.update(salt.encode("ascii"))
         password_hash.update(password.encode("ascii"))
-    except UnicodeDecodeError:
-        raise ValueError
+    except UnicodeDecodeError as e:
+        raise e("Can't hash password.")
     return password_hash.hexdigest()
 
 
 def check_password_hash(password_hash: str, password: str, salt: str) -> bool:
-    password_to_hash = generate_password_hash(password=password, salt=salt)
-    return password_to_hash == password_hash
+    return generate_password_hash(password=password, salt=salt) == password_hash
