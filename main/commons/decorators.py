@@ -51,7 +51,7 @@ def validate_request(schema: BaseSchema):
                     data = schema().load(request.args.to_dict())
             except ValidationError as e:
                 raise BadRequest(
-                    error_data=e.messages, error_message="Bad input value(s)"
+                    error_data=e.messages, error_message="Invalid input value(s)"
                 )
 
             return f(data, *args, **kwargs)
