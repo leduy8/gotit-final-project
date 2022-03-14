@@ -1,20 +1,22 @@
-from flask import jsonify, request
+from flask import jsonify
 
 from main import app
 from main.commons.decorators import validate_request
 from main.commons.exceptions import Unauthorized
-from main.schemas.user import UserSchema
 from main.engines import user as user_engine
 from main.libs.jwt import create_access_token
+from main.libs.password import check_password_hash
+from main.schemas.user import UserSchema
 
 
-@app.post('/auth')
-@validate_request('body', UserSchema)
-def login_user():
-    data = request.get_json()
-    user = user_engine.find_user_by_email_and_password(data['email'], data['password'])
+@app.post("/auth")
+@validate_request(UserSchema)
+def login_user(data):
+    user = user_engine.find_user_by_email(data["email"])
 
-    if not user:
-        raise Unauthorized(error_data=data, error_message=f'Wrong email or password.')
+    if not user or not check_password_hash(
+        user.password_hash, data["password"], user.salt
+    ):
+        raise Unauthorized(error_message="Wrong email or password.")
 
-    return jsonify({'access_token': create_access_token({'id': user.id})})
+    return jsonify({"access_token": create_access_token({"id": user.id})})
