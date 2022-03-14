@@ -1,4 +1,4 @@
-from tests.controllers.data_mocker import create_dummy_email, create_dummy_user
+from tests.data_mocker import create_dummy_email, create_dummy_user
 
 
 def test_success_register_user(client):
