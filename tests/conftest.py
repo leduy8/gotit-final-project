@@ -8,6 +8,11 @@ from alembic.config import Config
 
 from main import app as _app
 from main import db
+from tests.data_mocker import (
+    create_dummy_category,
+    create_dummy_item,
+    create_dummy_user,
+)
 
 if os.getenv("ENVIRONMENT") != "test":
     print('Tests should be run with "ENVIRONMENT=test"')
@@ -56,3 +61,18 @@ def session(monkeypatch):
 @pytest.fixture(scope="function", autouse=True)
 def client(app, session):
     return app.test_client()
+
+
+@pytest.fixture
+def user():
+    return create_dummy_user()
+
+
+@pytest.fixture
+def category(user):
+    return create_dummy_category(user.id)
+
+
+@pytest.fixture
+def item(category, user):
+    return create_dummy_item(category_id=category.id, user_id=user.id)
