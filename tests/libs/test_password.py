@@ -28,7 +28,7 @@ def test_success_check_password_hash():
     )
 
 
-def test_fail_check_password_hash_wrong_salt():
+def test_fail_check_password_hash_with_wrong_salt():
     salt = "123456123456"
     wrong_salt = "lmaolmaolmao"
     password = "duy123"
@@ -41,7 +41,7 @@ def test_fail_check_password_hash_wrong_salt():
     )
 
 
-def test_fail_check_password_hash_wrong_password():
+def test_fail_check_password_hash_with_wrong_password():
     salt = gen_salt()
     password = "duy123"
     wrong_password = "duy321"
