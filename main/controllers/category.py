@@ -112,7 +112,7 @@ def delete_category_by_id(user_id, id):
 
     if category.user_id != user_id:
         raise Forbidden(
-            error_message="User doesn't have permission to update this category"
+            error_message="User doesn't have permission to delete this category"
         )
 
     category_engine.delete_category(id)
