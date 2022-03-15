@@ -167,7 +167,7 @@ class TestUpdateCategoryById:
 
         assert response.status_code == 400
 
-    def test_fail_update_category_by_id_with_existing_name(
+    def test_fail_update_category_by_id_with_existing_name_as_owner(
         self, client, access_token, category
     ):
         response = client.put(
@@ -177,7 +177,22 @@ class TestUpdateCategoryById:
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
-        assert response.status_code == 400
+        assert response.status_code == 200
+
+    def test_fail_update_category_by_id_with_existing_name_as_not_owner(
+        self, client, category
+    ):
+        user = create_dummy_user(email="someone@gmail.com")
+        access_token = create_dummy_access_token(user)
+
+        response = client.put(
+            f"/categories/{category.id}",
+            json={"name": "Not Essentials"},
+            content_type="application/json",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert response.status_code == 403
 
     def test_fail_update_category_by_id_without_permission(self, client, category):
         user = create_dummy_user(email="something@gmail.com")
