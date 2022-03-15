@@ -49,12 +49,16 @@ def create_category(data, user_id):
 @validate_request(PaginationSchema)
 def get_categories(data, user_id):
     params = {
-        "page": data["page"] if "page" in data else 1,
-        "items_per_page": data["items_per_page"]
-        if "items_per_page" in data
-        else app.config["CATEGORIES_PER_PAGE"],
+        "page": 1,
+        "items_per_page": app.config["CATEGORIES_PER_PAGE"],
         "total_items": category_engine.get_category_count(),
     }
+
+    if "page" in data:
+        params["page"] = data["page"]
+
+    if "items_per_page" in data:
+        params["items_per_page"] = data["items_per_page"]
 
     categories = category_engine.get_categories(params)
 
