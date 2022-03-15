@@ -39,14 +39,11 @@ def create_item(data: Dict, user_id) -> ItemModel:
 def update_item(data, id) -> ItemModel:
     item = ItemModel.query.filter_by(id=id).first()
 
-    if "name" in data:
-        item.name = data["name"]
+    item.name = data["name"]
+    item.category_id = data["category_id"]
 
     if "description" in data:
         item.description = data["description"]
-
-    if "category_id" in data:
-        item.category_id = data["category_id"]
 
     db.session.commit()
 

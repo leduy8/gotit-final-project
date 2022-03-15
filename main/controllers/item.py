@@ -90,9 +90,8 @@ def update_item_by_id(data, user_id, id):
             error_message="User doesn't have permission to update this item"
         )
 
-    if "category_id" in data:
-        if not category_engine.find_category_by_id(data["category_id"]):
-            raise BadRequest(error_message="Invalid category id")
+    if not category_engine.find_category_by_id(data["category_id"]):
+        raise BadRequest(error_message="Invalid category id")
 
     updated_item = item_engine.update_item(data, id)
 
