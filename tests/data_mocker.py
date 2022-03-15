@@ -20,8 +20,8 @@ def create_dummy_access_token(user):
     return create_access_token({"id": user.id})
 
 
-def create_dummy_user():
-    data = {"email": "duy123@gmail.com", "password": "123456"}
+def create_dummy_user(email="duy123@gmail.com"):
+    data = {"email": email, "password": "123456"}
 
     user = create_user(data=data)
 

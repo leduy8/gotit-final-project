@@ -9,6 +9,7 @@ from alembic.config import Config
 from main import app as _app
 from main import db
 from tests.data_mocker import (
+    create_access_token,
     create_dummy_category,
     create_dummy_item,
     create_dummy_user,
@@ -66,6 +67,11 @@ def client(app, session):
 @pytest.fixture
 def user():
     return create_dummy_user()
+
+
+@pytest.fixture
+def access_token(user):
+    return create_access_token({"id": user.id})
 
 
 @pytest.fixture
