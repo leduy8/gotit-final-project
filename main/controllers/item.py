@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from flask import jsonify
 
-from main import app
+from main import app, config
 from main.commons.decorators import authorize_user, validate_request
 from main.commons.exceptions import BadRequest, Forbidden, NotFound
 from main.engines import category as category_engine
@@ -48,7 +48,7 @@ def create_item(data, user_id):
 def get_items(data, user_id):
     params = {
         "page": 1,
-        "items_per_page": app.config["ITEMS_PER_PAGE"],
+        "items_per_page": config.ITEMS_PER_PAGE,
         "total_items": item_engine.get_item_count(),
     }
 

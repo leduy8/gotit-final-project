@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from flask import jsonify
 
-from main import app
+from main import app, config
 from main.commons.decorators import authorize_user, validate_request
 from main.commons.exceptions import BadRequest, Forbidden, NotFound
 from main.engines import category as category_engine
@@ -50,7 +50,7 @@ def create_category(data, user_id):
 def get_categories(data, user_id):
     params = {
         "page": 1,
-        "items_per_page": app.config["CATEGORIES_PER_PAGE"],
+        "items_per_page": config.CATEGORIES_PER_PAGE,
         "total_items": category_engine.get_category_count(),
     }
 
