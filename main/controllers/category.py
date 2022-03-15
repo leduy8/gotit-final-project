@@ -94,7 +94,9 @@ def update_category_by_id(data, user_id, id):
             error_message="User doesn't have permission to update this category"
         )
 
-    if category_engine.find_category_by_name(data["name"]):
+    category_by_name = category_engine.find_category_by_name(data["name"])
+
+    if category_by_name and category_by_name.id != category.id:
         raise BadRequest(error_message="Category name has already been used")
 
     updated_category = category_engine.update_category(data, id)
