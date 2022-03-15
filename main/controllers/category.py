@@ -71,7 +71,7 @@ def get_categories(data, user_id):
 
 @app.get("/categories/<int:id>")
 @authorize_user(required=False)
-def find_category_by_id(user_id, id):
+def get_category_by_id(user_id, id):
     category = category_engine.find_category_by_id(id)
 
     if not category:
