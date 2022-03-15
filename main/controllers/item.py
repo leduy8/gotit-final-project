@@ -37,6 +37,9 @@ def get_item_data_with_params_data(items: List[ItemModel], user_id, *args, **kwa
 @authorize_user()
 @validate_request(ItemSchema)
 def create_item(data, user_id):
+    if not category_engine.find_category_by_id(data["category_id"]):
+        raise BadRequest(error_message="Invalid category id")
+
     item = item_engine.create_item(data, user_id)
 
     return ItemSchema().jsonify(item)
