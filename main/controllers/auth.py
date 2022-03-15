@@ -17,6 +17,6 @@ def login_user(data):
     if not user or not check_password_hash(
         user.password_hash, data["password"], user.salt
     ):
-        raise Unauthorized(error_message="Wrong email or password.")
+        raise Unauthorized(error_message="Wrong email or password")
 
     return jsonify({"access_token": create_access_token({"id": user.id})})

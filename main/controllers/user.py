@@ -12,7 +12,7 @@ from main.schemas.user import UserSchema
 @validate_request(UserSchema)
 def register_user(data):
     if user_engine.find_user_by_email(data["email"]):
-        raise BadRequest(error_message="Email is already registered.")
+        raise BadRequest(error_message="Email is already registered")
 
     user = user_engine.create_user(data)
 

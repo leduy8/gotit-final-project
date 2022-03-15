@@ -37,7 +37,7 @@ def get_category_data_with_params_data(
 @validate_request(CategorySchema)
 def create_category(data, user_id):
     if category_engine.find_category_by_name(data["name"]):
-        raise BadRequest(error_message="Category name has already been used.")
+        raise BadRequest(error_message="Category name has already been used")
 
     category = category_engine.create_category(data, user_id)
 
@@ -75,7 +75,7 @@ def get_category_by_id(user_id, id):
     category = category_engine.find_category_by_id(id)
 
     if not category:
-        raise NotFound(error_message="Category not found.")
+        raise NotFound(error_message="Category not found")
 
     return jsonify(get_category_data(category, user_id))
 
@@ -87,7 +87,7 @@ def update_category_by_id(data, user_id, id):
     category = category_engine.find_category_by_id(id)
 
     if not category:
-        raise NotFound(error_message="Category not found.")
+        raise NotFound(error_message="Category not found")
 
     if category.user_id != user_id:
         raise Forbidden(
@@ -95,7 +95,7 @@ def update_category_by_id(data, user_id, id):
         )
 
     if category_engine.find_category_by_name(data["name"]):
-        raise BadRequest(error_message="Category name has already been used.")
+        raise BadRequest(error_message="Category name has already been used")
 
     updated_category = category_engine.update_category(data, id)
 
@@ -108,7 +108,7 @@ def delete_category_by_id(user_id, id):
     category = category_engine.find_category_by_id(id)
 
     if not category:
-        raise NotFound(error_message="Category not found.")
+        raise NotFound(error_message="Category not found")
 
     if category.user_id != user_id:
         raise Forbidden(

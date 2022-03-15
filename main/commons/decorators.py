@@ -18,7 +18,7 @@ def authorize_user(required=True):
                 token = get_jwt_token()
             except ValueError:
                 if required:
-                    raise Unauthorized(error_message="Token is required.")
+                    raise Unauthorized(error_message="Token is required")
                 return f(None, *args, **kwargs)
 
             try:
@@ -27,12 +27,12 @@ def authorize_user(required=True):
 
                 if not user:
                     raise Forbidden(
-                        error_message="Token is invalid or has been revoked."
+                        error_message="Token is invalid or has been revoked"
                     )
 
                 return f(user.id, *args, **kwargs)
             except jwt.DecodeError:
-                raise Forbidden(error_message="Token is invalid or has been revoked.")
+                raise Forbidden(error_message="Token is invalid or has been revoked")
 
         return wrapper
 

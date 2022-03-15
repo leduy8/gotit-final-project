@@ -10,14 +10,14 @@ def create_access_token(payload: Dict) -> str:
     if type(payload) == dict:
         return jwt.encode(payload=payload, key=config.SECRET_KEY, algorithm="HS256")
 
-    raise TypeError("Payload must be a dictionary.")
+    raise TypeError("Payload must be a dictionary")
 
 
 def get_jwt_token() -> str:
     auth_header = request.headers.get("Authorization", None)
 
     if not auth_header:
-        raise ValueError("Authorization header not found.")
+        raise ValueError("Authorization header not found")
 
     auth_header_split = auth_header.split(" ")
 
