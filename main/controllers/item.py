@@ -1,77 +1,116 @@
-from flask import jsonify, request
+from typing import Dict, List
+
+from flask import jsonify
 
 from main import app
-from main.commons.decorators import require_authorized_user, require_non_authoried_user, validate_request
-from main.schemas.item import ItemSchema
-from main.schemas.base import PaginationSchema
+from main.commons.decorators import authorize_user, validate_request
+from main.commons.exceptions import BadRequest, Forbidden, NotFound
+from main.engines import category as category_engine
 from main.engines import item as item_engine
-from main.commons.exceptions import Forbidden, NotFound
+from main.models.item import ItemModel
+from main.schemas.base import PaginationSchema
+from main.schemas.item import ItemSchema
 
 
-@app.post('/items')
-@require_authorized_user
-@validate_request('body', ItemSchema)
-def create_item(user_id):
-    data = request.get_json() or {}
-    item = item_engine.create_item(data, user_id)
-
-    return ItemSchema().jsonify(item), 201
-
-
-@app.get('/items')
-@require_non_authoried_user
-@validate_request('params', PaginationSchema)
-def get_items(user_id):
-    params = {
-        'page': request.args.get('page', 1, type=int),
-        'items_per_page': request.args.get('items_per_page', app.config['ITEMS_PER_PAGE'], type=int),
-        'total_items': item_engine.get_item_count()
+def get_item_data(item: ItemModel, user_id: int) -> Dict:
+    return {
+        "id": item.id,
+        "name": item.name,
+        "description": item.description or None,
+        "created": item.created,
+        "updated": item.updated,
+        "is_owner": item.user_id == user_id,
+        "category_id": item.category_id,
     }
 
-    items = item_engine.get_all_items(params, user_id)
 
-    return jsonify(items)
+def get_item_data_with_params_data(items: List[ItemModel], user_id, *args, **kwargs):
+    return {
+        "items": [get_item_data(item, user_id) for item in items],
+        "page": kwargs["params"]["page"],
+        "items_per_page": kwargs["params"]["items_per_page"],
+        "total_items": kwargs["params"]["total_items"],
+    }
 
 
-@app.get('/items/<int:id>')
-@require_non_authoried_user
+@app.post("/items")
+@authorize_user()
+@validate_request(ItemSchema)
+def create_item(data, user_id):
+    item = item_engine.create_item(data, user_id)
+
+    return ItemSchema().jsonify(item)
+
+
+@app.get("/items")
+@authorize_user(required=False)
+@validate_request(PaginationSchema)
+def get_items(data, user_id):
+    params = {
+        "page": 1,
+        "items_per_page": app.config["ITEMS_PER_PAGE"],
+        "total_items": item_engine.get_item_count(),
+    }
+
+    if "page" in data:
+        params["page"] = data["page"]
+
+    if "items_per_page" in data:
+        params["items_per_page"] = data["items_per_page"]
+
+    items = item_engine.get_items(params)
+
+    return jsonify(
+        get_item_data_with_params_data(items=items, user_id=user_id, params=params)
+    )
+
+
+@app.get("/items/<int:id>")
+@authorize_user(required=False)
 def get_item_by_id(user_id, id):
-    item = item_engine.get_item_by_id(id, user_id)
+    item = item_engine.find_item_by_id(id)
 
     if not item:
-        raise NotFound(error_message=f'Item not found.')
+        raise NotFound(error_message="Item not found")
 
-    return jsonify(item)
+    return ItemSchema().jsonify(item)
 
 
-@app.put('/items/<int:id>')
-@require_authorized_user
-@validate_request('body', ItemSchema)
-def update_item_by_id(user_id, id):
-    item = item_engine.get_item_by_id(id, user_id)
+@app.put("/items/<int:id>")
+@authorize_user()
+@validate_request(ItemSchema)
+def update_item_by_id(data, user_id, id):
+    item = item_engine.find_item_by_id(id)
 
     if not item:
-        raise NotFound(error_message=f'Item not found.')
+        raise NotFound(error_message="Item not found")
 
-    if not item['is_owner']:
-        raise Forbidden(error_message=f'Token is invalid or has been revoked.')
+    if item.user_id != user_id:
+        raise Forbidden(
+            error_message="User doesn't have permission to update this item"
+        )
 
-    data = request.get_json()
+    if "category_id" in data:
+        if not category_engine.find_category_by_id(data["category_id"]):
+            raise BadRequest(error_message="Invalid category id")
+
     updated_item = item_engine.update_item(data, id)
 
     return ItemSchema().jsonify(updated_item)
 
 
-@app.delete('/items/<int:id>')
-@require_authorized_user
+@app.delete("/items/<int:id>")
+@authorize_user()
 def delete_item_by_id(user_id, id):
-    item = item_engine.get_item_by_id(id, user_id)
+    item = item_engine.find_item_by_id(id)
 
     if not item:
-        raise NotFound(error_message='Item not found.')
+        raise NotFound(error_message="Item not found")
 
-    if not item['is_owner']:
-        raise Forbidden(error_message='Token is invalid or has been revoked.')
+    if item.user_id != user_id:
+        raise Forbidden(
+            error_message="User doesn't have permission to delete this item"
+        )
 
     item_engine.delete_item(id)
 

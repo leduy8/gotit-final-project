@@ -8,51 +8,27 @@ def get_item_count() -> int:
     return ItemModel.query.count()
 
 
-def get_item_data(item: ItemModel, user_id: int) -> Dict:
-    return {
-        'id': item.id,
-        'name': item.name,
-        'description': item.description or None,
-        'created': item.created,
-        'updated': item.updated,
-        'is_owner': item.user_id == user_id,
-        'category_id': item.category_id
-    }
+def get_items(params: Dict) -> List[ItemModel]:
+    items = ItemModel.query.paginate(params["page"], params["items_per_page"], False)
+
+    items = [item for item in items.items]
+
+    return items
 
 
-def get_all_items(params: Dict, user_id: int) -> List[ItemModel]:
-    items = ItemModel.query.paginate(
-        params['page'],
-        params['items_per_page'],
-        False
-    )
-
-    items = [get_item_data(item, user_id) for item in items.items]
-
-    return {
-        'items': items,
-        'page': params['page'],
-        'items_per_page': params['items_per_page'],
-        'total_items': params['total_items']
-    }
-
-
-def get_item_by_id(id, user_id) -> Dict:
-    item = ItemModel.query.filter_by(id=id).first()
-
-    if not item:
-        return None
-
-    return get_item_data(item, user_id)
+def find_item_by_id(id) -> Dict:
+    return ItemModel.query.filter_by(id=id).first()
 
 
 def create_item(data: Dict, user_id) -> ItemModel:
     item = ItemModel(
-        name=data['name'],
+        name=data["name"],
         user_id=user_id,
-        category_id=data['category_id'],
-        description=data['description'] if 'description' in data else None
+        category_id=data["category_id"],
     )
+
+    if "description" in data:
+        item.description = data["description"]
 
     db.session.add(item)
     db.session.commit()
@@ -63,8 +39,14 @@ def create_item(data: Dict, user_id) -> ItemModel:
 def update_item(data, id) -> ItemModel:
     item = ItemModel.query.filter_by(id=id).first()
 
-    item.name = data['name']
-    item.description = data['description'] if 'description' in data else item.description
+    if "name" in data:
+        item.name = data["name"]
+
+    if "description" in data:
+        item.description = data["description"]
+
+    if "category_id" in data:
+        item.category_id = data["category_id"]
 
     db.session.commit()
 
