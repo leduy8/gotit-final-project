@@ -9,7 +9,14 @@ def get_item_count() -> int:
 
 
 def get_items(params: Dict) -> List[object]:
-    items = ItemModel.query.paginate(params["page"], params["items_per_page"], False)
+    if "category_id" in params:
+        items = ItemModel.query.filter_by(category_id=params["category_id"]).paginate(
+            params["page"], params["items_per_page"], False
+        )
+    else:
+        items = ItemModel.query.paginate(
+            params["page"], params["items_per_page"], False
+        )
 
     return [items.items, items.total]
 
