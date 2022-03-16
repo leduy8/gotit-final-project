@@ -1,14 +1,15 @@
-from typing import Dict, List
+from typing import Dict
 
 from flask import jsonify
 
-from main import app, config
-from main.commons.decorators import authorize_user, validate_request
+from main import app
+from main.commons.decorators import authenticate_user, pass_data
 from main.commons.exceptions import BadRequest, Forbidden, NotFound
 from main.engines import category as category_engine
 from main.models.category import CategoryModel
-from main.schemas.base import PaginationSchema
-from main.schemas.category import CategorySchema
+from main.schemas.dump.category import DumpCategorySchema
+from main.schemas.load.category import LoadCategorySchema
+from main.schemas.paginate import CategoryPaginationSchema
 
 
 def get_category_data(category: CategoryModel, user_id: int) -> Dict:
@@ -21,56 +22,38 @@ def get_category_data(category: CategoryModel, user_id: int) -> Dict:
     }
 
 
-def get_category_data_with_params_data(
-    categories: List[CategoryModel], user_id, *args, **kwargs
-):
-    return {
-        "categories": [get_category_data(category, user_id) for category in categories],
-        "page": kwargs["params"]["page"],
-        "items_per_page": kwargs["params"]["items_per_page"],
-        "total_items": kwargs["params"]["total_items"],
-    }
-
-
 @app.post("/categories")
-@authorize_user()
-@validate_request(CategorySchema)
+@authenticate_user()
+@pass_data(LoadCategorySchema)
 def create_category(data, user_id):
     if category_engine.find_category_by_name(data["name"]):
         raise BadRequest(error_message="Category name has already been used")
 
     category = category_engine.create_category(data, user_id)
 
-    return CategorySchema().jsonify(category)
+    return DumpCategorySchema().jsonify(category)
 
 
 @app.get("/categories")
-@authorize_user(required=False)
-@validate_request(PaginationSchema)
+@authenticate_user(required=False)
+@pass_data(CategoryPaginationSchema)
 def get_categories(data, user_id):
-    params = {
-        "page": 1,
-        "items_per_page": config.CATEGORIES_PER_PAGE,
-        "total_items": category_engine.get_category_count(),
-    }
-
-    if "page" in data:
-        params["page"] = data["page"]
-
-    if "items_per_page" in data:
-        params["items_per_page"] = data["items_per_page"]
-
-    categories = category_engine.get_categories(params)
+    categories, total_items = category_engine.get_categories(data)
 
     return jsonify(
-        get_category_data_with_params_data(
-            categories=categories, user_id=user_id, params=params
-        )
+        {
+            "categories": [
+                get_category_data(category, user_id) for category in categories
+            ],
+            "page": data["page"],
+            "items_per_page": data["items_per_page"],
+            "total_items": total_items,
+        }
     )
 
 
 @app.get("/categories/<int:id>")
-@authorize_user(required=False)
+@authenticate_user(required=False)
 def get_category_by_id(user_id, id):
     category = category_engine.find_category_by_id(id)
 
@@ -81,8 +64,8 @@ def get_category_by_id(user_id, id):
 
 
 @app.put("/categories/<int:id>")
-@authorize_user()
-@validate_request(CategorySchema)
+@authenticate_user()
+@pass_data(LoadCategorySchema)
 def update_category_by_id(data, user_id, id):
     category = category_engine.find_category_by_id(id)
 
@@ -99,13 +82,13 @@ def update_category_by_id(data, user_id, id):
     if category_by_name and category_by_name.id != category.id:
         raise BadRequest(error_message="Category name has already been used")
 
-    updated_category = category_engine.update_category(data, id)
+    updated_category = category_engine.update_category(data, category)
 
-    return CategorySchema().jsonify(updated_category)
+    return DumpCategorySchema().jsonify(updated_category)
 
 
 @app.delete("/categories/<int:id>")
-@authorize_user()
+@authenticate_user()
 def delete_category_by_id(user_id, id):
     category = category_engine.find_category_by_id(id)
 
@@ -117,6 +100,6 @@ def delete_category_by_id(user_id, id):
             error_message="User doesn't have permission to delete this category"
         )
 
-    category_engine.delete_category(id)
+    category_engine.delete_category(category)
 
     return jsonify({})

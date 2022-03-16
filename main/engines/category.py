@@ -8,25 +8,24 @@ def find_category_by_name(name: str) -> CategoryModel:
     return CategoryModel.query.filter_by(name=name).first()
 
 
-def find_category_by_id(id) -> Dict:
-    return CategoryModel.query.filter_by(id=id).first()
+def find_category_by_id(id: int) -> CategoryModel:
+    return CategoryModel.query.get(id)
 
 
 def get_category_count() -> int:
     return CategoryModel.query.count()
 
 
-def get_categories(params: Dict) -> List[CategoryModel]:
+def get_categories(params: Dict) -> List[object]:
+    """Returns list of list of category model and count of total items"""
     categories = CategoryModel.query.paginate(
         params["page"], params["items_per_page"], False
     )
 
-    categories = [category for category in categories.items]
-
-    return categories
+    return [categories.items, categories.total]
 
 
-def create_category(data: Dict, user_id) -> CategoryModel:
+def create_category(data: Dict, user_id: int) -> CategoryModel:
     category = CategoryModel(name=data["name"], user_id=user_id)
 
     db.session.add(category)
@@ -35,9 +34,7 @@ def create_category(data: Dict, user_id) -> CategoryModel:
     return category
 
 
-def update_category(data, id) -> CategoryModel:
-    category = CategoryModel.query.filter_by(id=id).first()
-
+def update_category(data: Dict, category: CategoryModel) -> CategoryModel:
     category.name = data["name"]
 
     db.session.commit()
@@ -45,11 +42,6 @@ def update_category(data, id) -> CategoryModel:
     return category
 
 
-def delete_category(id):
-    category = CategoryModel.query.filter_by(id=id).first()
-
-    if not category:
-        return None
-
+def delete_category(category: CategoryModel):
     db.session.delete(category)
     db.session.commit()
