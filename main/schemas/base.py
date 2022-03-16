@@ -11,10 +11,6 @@ class BaseSchema(Schema):
 
 
 class PaginationSchema(BaseSchema):
-    items_per_page = fields.Integer(
-        validate=validate.Range(min=1)
-    )
-    page = fields.Integer(
-        validate=validate.Range(min=1)
-    )
+    items_per_page = fields.Integer(validate=validate.Range(min=1))
+    page = fields.Integer(missing=1, validate=validate.Range(min=1))
     total_items = fields.Integer()
