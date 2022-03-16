@@ -1,18 +1,12 @@
-from datetime import datetime
-
 from main import db
+from main.models.base import BaseModel
 
 
-class ItemModel(db.Model):
+class ItemModel(BaseModel):
     __tablename__ = "item"
 
-    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), index=True, nullable=False)
     description = db.Column(db.String(200))
-    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    updated = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
-    )
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
 

@@ -1,17 +1,11 @@
-from datetime import datetime
-
 from main import db
+from main.models.base import BaseModel
 
 
-class CategoryModel(db.Model):
+class CategoryModel(BaseModel):
     __tablename__ = "category"
 
-    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    updated = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
-    )
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     items = db.relationship(
         "ItemModel", backref="category", cascade="all,delete", lazy="dynamic"

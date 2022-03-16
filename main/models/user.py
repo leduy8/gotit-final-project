@@ -1,21 +1,13 @@
-from datetime import datetime
-
-from sqlalchemy_utils import EmailType
-
 from main import db
+from main.models.base import BaseModel
 
 
-class UserModel(db.Model):
+class UserModel(BaseModel):
     __tablename__ = "user"
 
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(EmailType, index=True, unique=True, nullable=False)
+    email = db.Column(db.String(254), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(64), nullable=False)
-    salt = db.Column(db.String(12), nullable=False)
-    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    updated = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
-    )
+    password_salt = db.Column(db.String(12), nullable=False)
     categories = db.relationship(
         "CategoryModel", backref="owner", cascade="all,delete", lazy="dynamic"
     )
