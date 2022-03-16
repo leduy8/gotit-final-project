@@ -22,7 +22,7 @@ class TestCreateItem:
         assert response.status_code == 200
         assert type(response.json) == dict
 
-    def test_success_create_item_missing_description(
+    def test_success_create_item_with_missing_description(
         self, client, access_token, category
     ):
         response = client.post(
@@ -143,6 +143,16 @@ class TestGetItems:
 
         assert response.status_code == 200
 
+    def test_success_get_items_with_same_category_id(
+        self, client, access_token, category, item
+    ):
+        response = client.get(
+            f"/items?page=1&items_per_page=4&category_id={category.id}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert response.status_code == 200
+
     def test_success_get_items_without_token(self, client):
         response = client.get(
             "/items?page=1&items_per_page=4",
@@ -175,7 +185,7 @@ class TestGetItems:
 
         assert response.status_code == 401
 
-    def test_fail_get_items_invalid_page(self, client, access_token):
+    def test_fail_get_items_with_invalid_page(self, client, access_token):
         response = client.get(
             "/items?page=-1&items_per_page=4",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -183,9 +193,29 @@ class TestGetItems:
 
         assert response.status_code == 400
 
-    def test_fail_get_items_invalid_items_per_page(self, client, access_token):
+    def test_fail_get_items_with_invalid_items_per_page(self, client, access_token):
         response = client.get(
             "/items?page=1&items_per_page=-4",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert response.status_code == 400
+
+    def test_fail_get_items_with_invalid_category_id(
+        self, client, access_token, category, item
+    ):
+        response = client.get(
+            f"/items?page=1&items_per_page=4&category_id={category.id * -1}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert response.status_code == 400
+
+    def test_fail_get_items_with_nonexistent_category_id(
+        self, client, access_token, category, item
+    ):
+        response = client.get(
+            f"/items?page=1&items_per_page=4&category_id={category.id + 1000}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
