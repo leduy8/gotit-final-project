@@ -1,15 +1,16 @@
-from typing import Dict, List
+from typing import Dict
 
 from flask import jsonify
 
-from main import app, config
-from main.commons.decorators import authorize_user, validate_request
+from main import app
+from main.commons.decorators import authenticate_user, pass_data
 from main.commons.exceptions import BadRequest, Forbidden, NotFound
 from main.engines import category as category_engine
 from main.engines import item as item_engine
 from main.models.item import ItemModel
-from main.schemas.base import PaginationSchema
-from main.schemas.item import ItemSchema
+from main.schemas.dump.item import DumpItemSchema
+from main.schemas.load.item import LoadItemSchema
+from main.schemas.paginate import ItemPaginationSchema
 
 
 def get_item_data(item: ItemModel, user_id: int) -> Dict:
@@ -24,64 +25,48 @@ def get_item_data(item: ItemModel, user_id: int) -> Dict:
     }
 
 
-def get_item_data_with_params_data(items: List[ItemModel], user_id, *args, **kwargs):
-    return {
-        "items": [get_item_data(item, user_id) for item in items],
-        "page": kwargs["params"]["page"],
-        "items_per_page": kwargs["params"]["items_per_page"],
-        "total_items": kwargs["params"]["total_items"],
-    }
-
-
 @app.post("/items")
-@authorize_user()
-@validate_request(ItemSchema)
+@authenticate_user()
+@pass_data(LoadItemSchema)
 def create_item(data, user_id):
     if not category_engine.find_category_by_id(data["category_id"]):
         raise BadRequest(error_message="Invalid category id")
 
     item = item_engine.create_item(data, user_id)
 
-    return ItemSchema().jsonify(item)
+    return DumpItemSchema().jsonify(item)
 
 
 @app.get("/items")
-@authorize_user(required=False)
-@validate_request(PaginationSchema)
+@authenticate_user(required=False)
+@pass_data(ItemPaginationSchema)
 def get_items(data, user_id):
-    params = {
-        "page": 1,
-        "items_per_page": config.ITEMS_PER_PAGE,
-        "total_items": item_engine.get_item_count(),
-    }
-
-    if "page" in data:
-        params["page"] = data["page"]
-
-    if "items_per_page" in data:
-        params["items_per_page"] = data["items_per_page"]
-
-    items = item_engine.get_items(params)
+    items, total_items = item_engine.get_items(data)
 
     return jsonify(
-        get_item_data_with_params_data(items=items, user_id=user_id, params=params)
+        {
+            "items": [get_item_data(item, user_id) for item in items],
+            "page": data["page"],
+            "items_per_page": data["items_per_page"],
+            "total_items": total_items,
+        }
     )
 
 
 @app.get("/items/<int:id>")
-@authorize_user(required=False)
+@authenticate_user(required=False)
 def get_item_by_id(user_id, id):
     item = item_engine.find_item_by_id(id)
 
     if not item:
         raise NotFound(error_message="Item not found")
 
-    return ItemSchema().jsonify(item)
+    return DumpItemSchema().jsonify(item)
 
 
 @app.put("/items/<int:id>")
-@authorize_user()
-@validate_request(ItemSchema)
+@authenticate_user()
+@pass_data(LoadItemSchema)
 def update_item_by_id(data, user_id, id):
     item = item_engine.find_item_by_id(id)
 
@@ -96,13 +81,13 @@ def update_item_by_id(data, user_id, id):
     if not category_engine.find_category_by_id(data["category_id"]):
         raise BadRequest(error_message="Invalid category id")
 
-    updated_item = item_engine.update_item(data, id)
+    updated_item = item_engine.update_item(data, item)
 
-    return ItemSchema().jsonify(updated_item)
+    return DumpItemSchema().jsonify(updated_item)
 
 
 @app.delete("/items/<int:id>")
-@authorize_user()
+@authenticate_user()
 def delete_item_by_id(user_id, id):
     item = item_engine.find_item_by_id(id)
 
@@ -114,6 +99,6 @@ def delete_item_by_id(user_id, id):
             error_message="User doesn't have permission to delete this item"
         )
 
-    item_engine.delete_item(id)
+    item_engine.delete_item(item)
 
     return jsonify({})

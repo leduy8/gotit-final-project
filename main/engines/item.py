@@ -8,19 +8,17 @@ def get_item_count() -> int:
     return ItemModel.query.count()
 
 
-def get_items(params: Dict) -> List[ItemModel]:
+def get_items(params: Dict) -> List[object]:
     items = ItemModel.query.paginate(params["page"], params["items_per_page"], False)
 
-    items = [item for item in items.items]
-
-    return items
+    return [items.items, items.total]
 
 
-def find_item_by_id(id) -> Dict:
-    return ItemModel.query.filter_by(id=id).first()
+def find_item_by_id(id: int) -> ItemModel:
+    return ItemModel.query.get(id)
 
 
-def create_item(data: Dict, user_id) -> ItemModel:
+def create_item(data: Dict, user_id: int) -> ItemModel:
     item = ItemModel(
         name=data["name"],
         user_id=user_id,
@@ -36,9 +34,7 @@ def create_item(data: Dict, user_id) -> ItemModel:
     return item
 
 
-def update_item(data, id) -> ItemModel:
-    item = ItemModel.query.filter_by(id=id).first()
-
+def update_item(data: Dict, item: ItemModel) -> ItemModel:
     item.name = data["name"]
     item.category_id = data["category_id"]
 
@@ -50,11 +46,6 @@ def update_item(data, id) -> ItemModel:
     return item
 
 
-def delete_item(id):
-    item = ItemModel.query.filter_by(id=id).first()
-
-    if not item:
-        return None
-
+def delete_item(item: ItemModel):
     db.session.delete(item)
     db.session.commit()
