@@ -108,3 +108,11 @@ class InternalServerError(BaseError):
     status_code = StatusCode.INTERNAL_SERVER_ERROR
     error_message = _ErrorMessage.INTERNAL_SERVER_ERROR
     error_code = _ErrorCode.INTERNAL_SERVER_ERROR
+
+
+class MissingAuthorzationError(ValueError):
+    pass
+
+
+class InvalidAuthorizationError(ValueError):
+    pass
