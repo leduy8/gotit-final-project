@@ -41,6 +41,10 @@ def create_item(data, user_id):
 @authenticate_user(required=False)
 @pass_data(ItemPaginationSchema)
 def get_items(data, user_id):
+    if "category_id" in data:
+        if not category_engine.find_category_by_id(data["category_id"]):
+            raise BadRequest(error_message="Invalid category id")
+
     items, total_items = item_engine.get_items(data)
 
     return jsonify(
