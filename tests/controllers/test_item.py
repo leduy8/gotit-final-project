@@ -1,5 +1,6 @@
 from tests.data_mocker import (
     create_dummy_access_token,
+    create_dummy_invalid_access_token,
     create_dummy_text,
     create_dummy_user,
 )
@@ -116,7 +117,9 @@ class TestCreateItem:
 
         assert response.status_code == 400
 
-    def test_fail_create_item_with_invalid_token(self, client, access_token, category):
+    def test_fail_create_item_with_invalid_token(self, client, category):
+        invalid_token = create_dummy_invalid_access_token()
+
         response = client.post(
             "/items",
             json={
@@ -125,10 +128,10 @@ class TestCreateItem:
                 "category_id": category.id,
             },
             content_type="application/json",
-            headers={"Authorization": f"Bearer {access_token}wrong"},
+            headers={"Authorization": f"Bearer {invalid_token}"},
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestGetItems:
@@ -162,13 +165,15 @@ class TestGetItems:
 
         assert response.status_code == 200
 
-    def test_fail_get_items_with_invalid_token(self, client, access_token):
+    def test_fail_get_items_with_invalid_token(self, client):
+        invalid_token = create_dummy_invalid_access_token()
+
         response = client.get(
             "/items?page=1&items_per_page=4",
-            headers={"Authorization": f"Bearer {access_token}wrong"},
+            headers={"Authorization": f"Bearer {invalid_token}"},
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_fail_get_items_invalid_page(self, client, access_token):
         response = client.get(
@@ -202,13 +207,15 @@ class GetItemById:
 
         assert response.status_code == 200
 
-    def test_fail_get_item_by_id_with_invalid_token(self, client, access_token, item):
+    def test_fail_get_item_by_id_with_invalid_token(self, client, item):
+        invalid_token = create_dummy_invalid_access_token()
+
         response = client.get(
             f"/items/{item.id}",
-            headers={"Authorization": f"Bearer {access_token}wrong"},
+            headers={"Authorization": f"Bearer {invalid_token}"},
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_fail_get_item_by_id_with_invalid_id(self, client, access_token, item):
         response = client.get(
@@ -299,17 +306,17 @@ class TestUpdateItemById:
 
         assert response.status_code == 401
 
-    def test_fail_update_item_by_id_with_invalid_token(
-        self, client, access_token, item, category
-    ):
+    def test_fail_update_item_by_id_with_invalid_token(self, client, item, category):
+        invalid_token = create_dummy_invalid_access_token()
+
         response = client.put(
             f"/items/{item.id}",
             content_type="application/json",
             json={"name": "Item 1", "description": "Funny", "category_id": category.id},
-            headers={"Authorization": f"Bearer {access_token}wrong"},
+            headers={"Authorization": f"Bearer {invalid_token}"},
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_fail_update_item_by_id_with_invalid_name(
         self, client, access_token, item, category
@@ -417,15 +424,15 @@ class TestDeleteItemById:
 
         assert response.status_code == 401
 
-    def test_fail_delete_item_by_id_with_invalid_token(
-        self, client, access_token, item
-    ):
+    def test_fail_delete_item_by_id_with_invalid_token(self, client, item):
+        invalid_token = create_dummy_invalid_access_token()
+
         response = client.delete(
             f"/items/{item.id}",
-            headers={"Authorization": f"Bearer {access_token}wrong"},
+            headers={"Authorization": f"Bearer {invalid_token}"},
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_fail_delete_item_by_with_nonexistent_id(self, client, access_token, item):
         response = client.delete(

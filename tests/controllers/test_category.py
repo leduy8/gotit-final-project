@@ -1,5 +1,6 @@
 from tests.data_mocker import (
     create_dummy_access_token,
+    create_dummy_invalid_access_token,
     create_dummy_text,
     create_dummy_user,
 )
@@ -85,13 +86,15 @@ class TestGetCategories:
 
         assert response.status_code == 200
 
-    def test_fail_get_categories_with_invalid_token(self, client, access_token):
+    def test_fail_get_categories_with_invalid_token(self, client):
+        invalid_token = create_dummy_invalid_access_token()
+
         response = client.get(
             "/categories?page=1&items_per_page=4",
-            headers={"Authorization": f"Bearer {access_token}wrong"},
+            headers={"Authorization": f"Bearer {invalid_token}"},
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_fail_get_categories_with_invalid_page(self, client, access_token):
         response = client.get(
@@ -216,17 +219,17 @@ class TestUpdateCategoryById:
 
         assert response.status_code == 401
 
-    def test_fail_update_category_by_id_with_invalid_token(
-        self, client, access_token, category
-    ):
+    def test_fail_update_category_by_id_with_invalid_token(self, client, category):
+        invalid_token = create_dummy_invalid_access_token()
+
         response = client.put(
             f"/categories/{category.id}",
             json={"name": "Another Category"},
             content_type="application/json",
-            headers={"Authorization": f"Bearer {access_token}wrong"},
+            headers={"Authorization": f"Bearer {invalid_token}"},
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_fail_update_category_by_id_with_invalid_name_length(
         self, client, access_token, category
@@ -297,16 +300,16 @@ class TestDeleteCategoryById:
 
         assert response.status_code == 401
 
-    def test_fail_delete_category_by_id_with_invalid_token(
-        self, client, access_token, category
-    ):
+    def test_fail_delete_category_by_id_with_invalid_token(self, client, category):
+        invalid_token = create_dummy_invalid_access_token()
+
         response = client.delete(
             f"/categories/{category.id}",
             content_type="application/json",
-            headers={"Authorization": f"Bearer {access_token}wrong"},
+            headers={"Authorization": f"Bearer {invalid_token}"},
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_fail_delete_category_by_with_nonexistent_id(
         self, client, access_token, category
